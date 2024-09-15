@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>My second three.js app</title>
+        <style>
+            body { margin: 0; }
+        </style>
+    </head>
+
+    <body>
+	    <script type="importmap">
+	      {
+	        "imports": {
+	          "three": "https://unpkg.com/three@0.139.2/build/three.module.js"
+	        }
+	      }
+	    </script>
+     <script type="module">
+
+      		import * as THREE from 'three';
+      		import { OrbitControls } from 'https://unpkg.com/three@0.139.2/examples/jsm/controls/OrbitControls.js';
+
+			//preparo da cena
+			const scene = new THREE.Scene();
+			const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 ); //cria a camera
+			const renderer = new THREE.WebGLRenderer();
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			document.body.appendChild( renderer.domElement );
+
+			//axis pespectiva da camera
+			const axesHelper = new THREE.AxesHelper(3);
+			scene.add(axesHelper);
+			camera.position.z = 5;
+			camera.position.y = 2;
+			camera.position.set(-0.5,1.5,5); //equivale a setar o x, y, z simultaneamente
+
+			// grid
+			const size = 10;
+			const divisions = 10;
+			const gridHelper = new THREE.GridHelper( size, divisions );
+	
+
+			// Material
+			const material_wireframe = new THREE.MeshBasicMaterial( { color: 0xffff00, wireframe: true } ); 
+			const material_solid = new THREE.MeshStandardMaterial( { color: 0xffffff, wireframe: false } ); 
+
+			//Forma Cube
+			const cubeGeometry = new THREE.BoxGeometry( 1, 1, 1 ); 
+			const cube = new THREE.Mesh( cubeGeometry, material_solid ); 
+			
+
+			//Forma esfera
+			const geometry = new THREE.SphereGeometry( 1 ); 
+			const sphere = new THREE.Mesh( geometry, material_solid ); 
+	
+			console.log(sphere)
+
+			//orbit control
+			const orbitControls = new OrbitControls(camera, renderer.domElement);
+		    orbitControls.maxPolarAngle = Math.PI * 0.5;
+		    orbitControls.minDistance = 0.1;
+		    orbitControls.maxDistance = 100;
+		    orbitControls.autoRotate = false; 
+		    orbitControls.autoRotateSpeed = 1.0; 
+
+			// Direction Light
+			const directionalLight = new THREE.DirectionalLight( 0xff55ff, 1);
+
+			const directionalLight2 = new THREE.DirectionalLight( 0xff5555, 2   );
+			directionalLight2.position.set(1000, -1000)
+
+			// ADD SCENE
+			scene.add( directionalLight );
+			scene.add( sphere );
+			scene.add( cube );
+			scene.add( gridHelper );
+			scene.add( directionalLight2 );
+
+			function animateForm(){
+
+				orbitControls.update();
+
+				renderer.render(scene, camera);
+	
+				// camera.position.x += 0.10
+				
+				cube.rotation.x += 0.1
+				cube.rotation.z += 0.1
+			}
+
+			renderer.setAnimationLoop( animateForm );
+
+
+
+
+		</script>
+	</body>
+</html>
