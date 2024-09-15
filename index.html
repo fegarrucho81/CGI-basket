@@ -1,99 +1,97 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="utf-8">
-        <title>My second three.js app</title>
-        <style>
-            body { margin: 0; }
-        </style>
-    </head>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Three.js Basketball with OrbitControls and GridHelper</title>
+    <style>
+        body { margin: 0; }
+    </style>
+</head>
+<body>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.139.2/build/three.module.js",
+          "OrbitControls": "https://unpkg.com/three@0.139.2/examples/jsm/controls/OrbitControls.js"
+        }
+      }
+    </script>
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'OrbitControls';
 
-    <body>
-	    <script type="importmap">
-	      {
-	        "imports": {
-	          "three": "https://unpkg.com/three@0.139.2/build/three.module.js"
-	        }
-	      }
-	    </script>
-     <script type="module">
+        // Preparação da cena
+        const scene = new THREE.Scene();
 
-      		import * as THREE from 'three';
-      		import { OrbitControls } from 'https://unpkg.com/three@0.139.2/examples/jsm/controls/OrbitControls.js';
+        // Criação da câmera
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 1, 5);
 
-			//preparo da cena
-			const scene = new THREE.Scene();
-			const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 ); //cria a camera
-			const renderer = new THREE.WebGLRenderer();
-			renderer.setSize( window.innerWidth, window.innerHeight );
-			document.body.appendChild( renderer.domElement );
+        // Configuração do renderizador
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
 
-			//axis pespectiva da camera
-			const axesHelper = new THREE.AxesHelper(3);
-			scene.add(axesHelper);
-			camera.position.z = 5;
-			camera.position.y = 2;
-			camera.position.set(-0.5,1.5,5); //equivale a setar o x, y, z simultaneamente
+        // Adicionando os eixos
+        const axesHelper = new THREE.AxesHelper(3);
+        scene.add(axesHelper);
 
-			// grid
-			const size = 10;
-			const divisions = 10;
-			const gridHelper = new THREE.GridHelper( size, divisions );
-	
+        // Adicionando GridHelper
+        const gridHelper = new THREE.GridHelper(10, 10); // Tamanho do grid e quantidade de linhas/colunas
+        scene.add(gridHelper);
 
-			// Material
-			const material_wireframe = new THREE.MeshBasicMaterial( { color: 0xffff00, wireframe: true } ); 
-			const material_solid = new THREE.MeshStandardMaterial( { color: 0xffffff, wireframe: false } ); 
+        // Luzes
+        const light1 = new THREE.DirectionalLight(0x0000ff); // Cor azul
+        light1.position.set(1, 1, 1).normalize(); // Direção da luz
+        scene.add(light1);
 
-			//Forma Cube
-			const cubeGeometry = new THREE.BoxGeometry( 1, 1, 1 ); 
-			const cube = new THREE.Mesh( cubeGeometry, material_solid ); 
-			
+        const light2 = new THREE.DirectionalLight(0xfff000); // Cor amarela
+        light2.position.set(-2, -3, 1).normalize(); // Direção da luz oposta
+        scene.add(light2);
 
-			//Forma esfera
-			const geometry = new THREE.SphereGeometry( 1 ); 
-			const sphere = new THREE.Mesh( geometry, material_solid ); 
-	
-			console.log(sphere)
+        // Carregar a textura de uma bola de basquete
+        const textureLoader = new THREE.TextureLoader();
+        const basketballTexture = textureLoader.load('https://threejsfundamentals.org/threejs/resources/images/basketball.jpg');
 
-			//orbit control
-			const orbitControls = new OrbitControls(camera, renderer.domElement);
-		    orbitControls.maxPolarAngle = Math.PI * 0.5;
-		    orbitControls.minDistance = 0.1;
-		    orbitControls.maxDistance = 100;
-		    orbitControls.autoRotate = false; 
-		    orbitControls.autoRotateSpeed = 1.0; 
+        // Criar a geometria da bola de basquete
+        const geometrySphere = new THREE.SphereGeometry(1, 32, 32); // Aumentei a resolução da esfera
+        const materialSphere = new THREE.MeshStandardMaterial({
+            map: basketballTexture, // Aplica a textura da bola de basquete
+        });
 
-			// Direction Light
-			const directionalLight = new THREE.DirectionalLight( 0xff55ff, 1);
+        const sphere = new THREE.Mesh(geometrySphere, materialSphere);
+        light1.intensity = 1.5; // Aumenta a intensidade da luz1
+        light2.intensity = 0.8; // Ajusta a intensidade da luz2
+        scene.add(sphere);
 
-			const directionalLight2 = new THREE.DirectionalLight( 0xff5555, 2   );
-			directionalLight2.position.set(1000, -1000)
+        // Adicionando OrbitControls
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true; // animação suave
+        controls.dampingFactor = 0.25;
+        controls.enableZoom = true;
+        controls.autoRotate = false;
 
-			// ADD SCENE
-			scene.add( directionalLight );
-			scene.add( sphere );
-			scene.add( cube );
-			scene.add( gridHelper );
-			scene.add( directionalLight2 );
+        // Função de animação
+        function animate() {
+            // Atualiza os controles
+            controls.update();
 
-			function animateForm(){
+            // Renderiza a cena
+            renderer.render(scene, camera);
 
-				orbitControls.update();
+            // Solicita a próxima animação
+            requestAnimationFrame(animate);
+        }
 
-				renderer.render(scene, camera);
-	
-				// camera.position.x += 0.10
-				
-				cube.rotation.x += 0.1
-				cube.rotation.z += 0.1
-			}
+        // Inicia a animação
+        animate();
 
-			renderer.setAnimationLoop( animateForm );
-
-
-
-
-		</script>
-	</body>
+        // Ajusta o tamanho do renderizador ao redimensionar a janela
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
 </html>
